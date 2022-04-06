@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% set title = "Home" %}
+{% block content %}
+    <h3 style = "text-align: center;">
+        Roblox is currently
+        <span id = "status" style = "color: var(--ii-{{ status[1] }});">{{ status[0] }}</span>!
+    </h3>
+    {% for row in data %}
+        <div class = "row service-row">
+            {% for service in row %}
+                <div class = "col-sm-2">
+                    <div class = "card service-card">
+                        <div class = "card-body" data-rsl-id = "{{ service['id'] }}">
+                            {% set color = {"up": "green", "slow": "yellow", "down": "red"}[service["guess"][0]] %}
+                            <h6 class = "card-title" style = "color: var(--ii-{{ color }});"  data-bs-toggle = "tooltip" data-bs-placement = "top" title = "{{ service['url'].removeprefix('https://').split('/')[0] }}">{{ service["name"] }}</h6>
+                            <span style = "position: absolute; right: 1rem; top: 1rem;">{{ service["ping"]|round(2)|int }}ms</span>
+                            <p class = "card-text">{{ service["guess"][1] }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+{% endblock %}
+{% block jstags %}
+    <script>
+        // Copyright 2022 iiPython
+
+        // Initialization
+        const LocaleFormatter = new Intl.DateTimeFormat("en-US", { hour12: true, hour: "2-digit", minute: "2-digit" });
+        const DateTimeFormatter = new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "2-digit", day: "2-digit", year: "2-digit" });
+
+        $("[data-bs-toggle='tooltip']").each((i, e) => { new bootstrap.Tooltip(e); })
+
+        // Handle historical data
+        let formatDate = (date = new Date()) => DateTimeFormatter.format(new Date(date)).replace(/\//g, "-");
+        var historyChart = null;
+        function hsRenderDate(date) {
+            let formattedDate = formatDate(date);
+            let serviceID = $("#hscanvas").attr("data-rsl-id");
+
+            // Create the chart
+            $.get(`/api/historical?id=${serviceID}&date=${formattedDate}`, {}, (r) => {
+                const ctx = document.getElementById("hscanvas").getContext("2d");
+                if (historyChart) historyChart.destroy();
+                historyChart = new Chart(ctx, {
+                    type: "line",
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { title: { display: true, text: "Time" } },
+                            y: { title: { display: true, text: "Ping" } }
+                        }
+                    }
+                });
+                historyChart.data.datasets = [{
+                    label: "Ping",
+                    data: Object.entries(r.data).map(v => { return { x: LocaleFormatter.format(v[0]), y: v[1] } } ),
+                    borderColor: "rgb(159, 159, 159)"
+                }];
+                historyChart.update();
+            })
+        }
+        function hsRenderCustomDate() {
+            bootbox.prompt({
+                title: "Select date to view",
+                inputType: "date",
+                callback: hsRenderDate
+            });
+        }
+        $("div[data-rsl-id] h6").click((e) => {
+            let serviceID = $(e.currentTarget).parent().attr("data-rsl-id");
+            bootbox.dialog({
+                title: $(`div[data-rsl-id='${serviceID}'] h6`).text(),
+                message: `
+                <div><canvas id = "hscanvas" height = "300" width = "400" data-rsl-id = "${serviceID}"></canvas></div>
+                <p class = "modal-notice"><a onclick = "hsRenderDate();">Today</a> · <a onclick = "hsRenderCustomDate();">Custom</a></p>
+                `,
+                buttons: { ok: { label: "Close", className: "btn btn-secondary", callback: () => {} } },
+                onEscape: true
+            })
+            hsRenderDate();
+        })
+
+        // Handle autoreloading
+        setInterval(() => {
+            $.get("/api/status", {}, (d) => {
+
+                // Load status information
+                $("#status").text(d.status[0]);
+                $("#status").css("color", `var(--ii-${d.status[1]})`);
+
+                // Render our service data
+                for (let service of d.services) {
+                    let elems = $(`div[data-rsl-id='${service.id}']`).children();
+                    let color = { up: "green", slow: "yellow", down: "red" }[service.guess[0]];
+
+                    // Update service data
+                    $(elems[0]).css("color", `var(--ii-${color})`);  // Service header
+                    $(elems[1]).text(`${Math.round(service.ping)}ms`);  // Ping time
+                    $(elems[2]).text(service.guess[1]);  // Guess element (.card-text)
+                }
+            })
+        }, 60000);  // 1m since our internal database doesn't update faster than that
+    </script>
+{% endblock %}

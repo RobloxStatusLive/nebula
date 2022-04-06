@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% set title = "API docs" %}
+{% block content %}
+    <h3>Dataset downloads</h3>
+    <div class = "card dark-card">
+        <div class = "card-body">
+            <div class = "row g-3 align-items-center">
+                <div class = "col-auto">
+                    <input type = "date" class = "form-control" id = "downloadSelect">
+                </div>
+                <div class = "col-auto">
+                    <button class = "btn btn-outline-success" onclick = "downloadSelectedDS();">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>API Documentation</h3>
+    <div class = "endpoint-container">
+        <div class = "card dark-card endpoint">
+            <div class = "card-body">
+                <h5><span class = "badge bg-success">GET</span> <a data-bs-toggle = "collapse" href = "#apiEndpointStatus" role = "button" aria-expanded = "false">/api/status</a></h5>
+                <div class = "collapse" id = "apiEndpointStatus">
+                    <div class = "card card-body">
+                        <p>Shows the latest status data available for all services.<br>Response Schema:</p>
+                        <code><pre>{
+    "services": [
+        {
+            "code": 200,
+            "guess": ["up", "No problems detected"],
+            "id": "auth",
+            "name": "Authentication",
+            "ping": 115.52,
+            "url": "https://auth.roblox.com/"
+        },
+        ...
+    ],
+    "status": ["online", "green"]
+}</pre></code>
+                        
+                        <p>Example URL: https://robloxstatus.live/api/status</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class = "card dark-card endpoint">
+            <div class = "card-body">
+                <h5><span class = "badge bg-success">GET</span> <a data-bs-toggle = "collapse" href = "#apiEndpointHistorical" role = "button" aria-expanded = "false">/api/historical</a></h5>
+                <div class = "collapse" id = "apiEndpointHistorical">
+                    <div class = "card card-body">
+                        <p>
+                            Retrieves historical data for a given Roblox service. The returned times are in the form of a UTC timestamp (ms). <br>
+                            Response Schema:
+                        </p>
+                        <code><pre>{
+    "data": {
+        "1648425607018.1714": 182.25,
+        "1648425667087.197": 181.9,
+        "1648425727158.2974": 178.01,
+        ...
+    },
+    "name": "Authentication",
+    "uptime": 100.0
+}</pre></code>
+                        
+                        <p>
+                            Parameters:
+                            <ul>
+                                <li><code>id</code> - String - The service ID *</li>
+                                <li><code>date</code> - String - Change the date of the returned data (mm-dd-yy)</li>
+                            </ul>
+                        </p>
+                        <p>Example URL: https://robloxstatus.live/api/historical?id=auth<br>* Indicates a required parameter</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block jstags %}
+    <script>
+        const DateTimeFormatter = new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "2-digit", day: "2-digit", year: "2-digit" });
+        const formatDate = (date = new Date()) => DateTimeFormatter.format(new Date(date)).replace(/\//g, "-");
+        function downloadSelectedDS() {
+            window.location.href = `/api/download?date=${formatDate($('#downloadSelect').val())}`;
+        }
+    </script>
+{% endblock %}
