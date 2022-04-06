@@ -1,3 +1,4 @@
 {
-    "nebula.upstream": "data.robloxstatus.live"
+    "nebula.upstream": "data.robloxstatus.live",
+    "nebula.cache_dir": "./cache"
 }
