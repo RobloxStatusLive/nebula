@@ -99,7 +99,7 @@ class SyncReader(object):
 class SyncManager(object):
     def __init__(self) -> None:
         self.rcon = Console()
-        self.upstream = f"https://{config.get('nebula.upstream')}/sync/"
+        self.upstream = f"{config.get('nebula.protocol', 'https')}://{config.get('nebula.upstream')}/sync/"
 
     def cache(self, fn: str, data: str) -> None:
         fp = os.path.join(cache_dir, fn)
