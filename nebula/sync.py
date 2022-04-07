@@ -53,7 +53,10 @@ class SyncReader(object):
     def __init__(self) -> None:
         self.date_formats = ["%-m-%-d-%Y", "%m-%d-%Y", "%-m-%-d-%y", "%m-%d-%y"]
 
-    def format_date(self, date: str) -> str:
+    def format_date(self, date: datetime | str) -> str:
+        if isinstance(date, datetime):
+            return date.strftime("%-m-%-d-%Y")
+
         for df in self.date_formats:
             try:
                 return datetime.strptime(date, df).strftime("%-m-%-d-%Y")
@@ -61,7 +64,7 @@ class SyncReader(object):
             except ValueError:
                 pass
 
-    def get_date(self, date: str) -> dict | None:
+    def get_date(self, date: datetime | str) -> dict | None:
         path = os.path.join(cache_dir, f"{self.format_date(date)}.json")
         if not os.path.isfile(path):
             return None
@@ -69,12 +72,28 @@ class SyncReader(object):
         with open(path, "r") as fh:
             return json.loads(fh.read())
 
-    def get_date_latest(self, date: str) -> dict | None:
+    def get_date_latest(self, date: datetime | str) -> dict | None:
         data = self.get_date(date)
         if data is None:
             return None
 
         return data[sorted(data, key = lambda d: d, reverse = True)[0]]
+
+    def get_current(self) -> dict:
+        return self.get_date_latest(datetime.now())
+
+    def get_overall_status(self, date: datetime | str = None) -> str | None:
+        if date is None:
+            date = datetime.now()
+
+        data = self.get_date_latest(date)
+        if data is None:
+            return None
+
+        data = data.items()
+        slow = len([i for i, v in data if v["guess"]["name"] == "slow"])
+        down = len([i for i, v in data if v["guess"]["name"] == "down"])
+        return "slow" if slow > 3 else ("down" if slow > 6 or down > 2 else "online")
 
 # Sync class
 class SyncManager(object):

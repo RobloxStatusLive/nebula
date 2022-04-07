@@ -51,12 +51,15 @@
                 height: 5rem;
                 z-index: 999;
                 position: fixed;
-                background-color: var(--ii-bg2);
+                background-image: url("/s/img/{{ status }}.png");
             }
             nav div {
                 top: 50%;
                 position: relative;
                 transform: translateY(-50%);
+            }
+            nav div a {
+                color: black;
             }
             a {
                 color: var(--ii-gray1);
@@ -154,9 +157,7 @@
         <nav>
             <div align = "center">
                 <h1 class = "navbar-brand"><a href = "/">
-                    <span style = "color: var(--ii-fg);">Roblox</span>
-                    <span style = "color: var(--ii-red);">Status</span>
-                    <span style = "color: var(--ii-blue);">Live</span>
+                    <span style = "color: black;">Roblox Status Live</span>
                 </a></h1>
                 <a href = "/api/docs">API docs</a> ·
                 <a href = "https://github.com/RobloxStatusLive/nebula">Github</a> ·

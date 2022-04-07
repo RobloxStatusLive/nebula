@@ -1,20 +1,6 @@
 {% extends "base.html" %}
 {% set title = "API docs" %}
 {% block content %}
-    <h3>Dataset downloads</h3>
-    <div class = "card dark-card">
-        <div class = "card-body">
-            <div class = "row g-3 align-items-center">
-                <div class = "col-auto">
-                    <input type = "date" class = "form-control" id = "downloadSelect">
-                </div>
-                <div class = "col-auto">
-                    <button class = "btn btn-outline-success" onclick = "downloadSelectedDS();">Download</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <h3>API Documentation</h3>
     <div class = "endpoint-container">
         <div class = "card dark-card endpoint">
@@ -24,18 +10,23 @@
                     <div class = "card card-body">
                         <p>Shows the latest status data available for all services.<br>Response Schema:</p>
                         <code><pre>{
-    "services": [
-        {
+    "data": {
+        ads: {
             "code": 200,
-            "guess": ["up", "No problems detected"],
-            "id": "auth",
-            "name": "Authentication",
-            "ping": 115.52,
-            "url": "https://auth.roblox.com/"
+            "guess": {
+                "name": "up",
+                "reason": "No problems detected"
+            },
+            "id": "ads",
+            "machineID": "CHI1-WEB3953",
+            "message": "OK",
+            "name": "Ad Service",
+            "ping": 170,
+            "url": "https://ads.roblox.com"
         },
         ...
     ],
-    "status": ["online", "green"]
+    "status": "online"
 }</pre></code>
                         
                         <p>Example URL: https://robloxstatus.live/api/status</p>
@@ -45,32 +36,54 @@
         </div>
         <div class = "card dark-card endpoint">
             <div class = "card-body">
-                <h5><span class = "badge bg-success">GET</span> <a data-bs-toggle = "collapse" href = "#apiEndpointHistorical" role = "button" aria-expanded = "false">/api/historical</a></h5>
+                <h5><span class = "badge bg-success">GET</span> <a data-bs-toggle = "collapse" href = "#apiEndpointHistorical" role = "button" aria-expanded = "false">/api/day/:date/:?service</a></h5>
                 <div class = "collapse" id = "apiEndpointHistorical">
                     <div class = "card card-body">
                         <p>
-                            Retrieves historical data for a given Roblox service. The returned times are in the form of a UTC timestamp (ms). <br>
-                            Response Schema:
+                            Retrieves historical data for a given day (or optionally, a service on that day). The returned times are in the form of a UTC timestamp (ms). <br>
+                            Response Schema (/api/day/:date):
                         </p>
                         <code><pre>{
     "data": {
-        "1648425607018.1714": 182.25,
-        "1648425667087.197": 181.9,
-        "1648425727158.2974": 178.01,
+        "1649269221476": {
+            "ads": {
+                "code": 200,
+                "guess": {
+                    "name": "up",
+                    "reason": "No problems detected"
+                },
+                "id": "ads",
+                "machineID": "CHI1-WEB3953",
+                "message": "OK",
+                "name": "Ad Service",
+                "ping": 170,
+                "url": "https://ads.roblox.com"
+            }
+        },
         ...
     },
-    "name": "Authentication",
-    "uptime": 100.0
+    "status": "online"
 }</pre></code>
-                        
-                        <p>
-                            Parameters:
-                            <ul>
-                                <li><code>id</code> - String - The service ID *</li>
-                                <li><code>date</code> - String - Change the date of the returned data (mm-dd-yy)</li>
-                            </ul>
-                        </p>
-                        <p>Example URL: https://robloxstatus.live/api/historical?id=auth<br>* Indicates a required parameter</p>
+                        <p>Response Schema (/api/day/:date/:service):</p>
+                        <code><pre>{
+    "data": {
+        "1649269221476": {
+            "code": 200,
+            "guess": {
+                "name": "up",
+                "reason": "No problems detected"
+            },
+            "id": "ads",
+            "machineID": "CHI1-WEB3953",
+            "message": "OK",
+            "name": "Ad Service",
+            "ping": 170,
+            "url": "https://ads.roblox.com"
+        },
+        ...
+    }
+}</pre></code>
+                        <p>Example URL: https://robloxstatus.live/api/day/04-06-22/auth</p>
                     </div>
                 </div>
             </div>

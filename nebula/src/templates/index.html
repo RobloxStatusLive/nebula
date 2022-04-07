@@ -1,20 +1,16 @@
 {% extends "base.html" %}
 {% set title = "Home" %}
 {% block content %}
-    <h3 style = "text-align: center;">
-        Roblox is currently
-        <span id = "status" style = "color: var(--ii-{{ status[1] }});">{{ status[0] }}</span>!
-    </h3>
     {% for row in data %}
         <div class = "row service-row">
-            {% for service in row %}
+            {% for id, service in row.items() %}
                 <div class = "col-sm-2">
                     <div class = "card service-card">
-                        <div class = "card-body" data-rsl-id = "{{ service['id'] }}">
-                            {% set color = {"up": "green", "slow": "yellow", "down": "red"}[service["guess"][0]] %}
-                            <h6 class = "card-title" style = "color: var(--ii-{{ color }});"  data-bs-toggle = "tooltip" data-bs-placement = "top" title = "{{ service['url'].removeprefix('https://').split('/')[0] }}">{{ service["name"] }}</h6>
+                        <div class = "card-body" data-rsl-id = "{{ id }}">
+                            {% set color = {"up": "green", "slow": "yellow", "down": "red"}[service["guess"]["name"]] %}
+                            <h6 class = "card-title" style = "color: var(--ii-{{ color }});" data-bs-toggle = "tooltip" data-bs-placement = "top" title = "{{ service['url'].removeprefix('https://').split('/')[0] }}">{{ service["name"] }}</h6>
                             <span style = "position: absolute; right: 1rem; top: 1rem;">{{ service["ping"]|round(2)|int }}ms</span>
-                            <p class = "card-text">{{ service["guess"][1] }}</p>
+                            <p class = "card-text">{{ service["guess"]["reason"] }}</p>
                         </div>
                     </div>
                 </div>
@@ -28,19 +24,18 @@
 
         // Initialization
         const LocaleFormatter = new Intl.DateTimeFormat("en-US", { hour12: true, hour: "2-digit", minute: "2-digit" });
-        const DateTimeFormatter = new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "2-digit", day: "2-digit", year: "2-digit" });
+        const DateTimeFormatter = new Intl.DateTimeFormat("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" });
 
         $("[data-bs-toggle='tooltip']").each((i, e) => { new bootstrap.Tooltip(e); })
 
         // Handle historical data
-        let formatDate = (date = new Date()) => DateTimeFormatter.format(new Date(date)).replace(/\//g, "-");
         var historyChart = null;
+        let formatDate = (date = new Date()) => DateTimeFormatter.format(new Date(date)).replace(/\//g, "-");
         function hsRenderDate(date) {
-            let formattedDate = formatDate(date);
             let serviceID = $("#hscanvas").attr("data-rsl-id");
 
             // Create the chart
-            $.get(`/api/historical?id=${serviceID}&date=${formattedDate}`, {}, (r) => {
+            $.get(`/api/day/${formatDate(date)}/${serviceID}`, {}, (r) => {
                 const ctx = document.getElementById("hscanvas").getContext("2d");
                 if (historyChart) historyChart.destroy();
                 historyChart = new Chart(ctx, {
@@ -56,7 +51,7 @@
                 });
                 historyChart.data.datasets = [{
                     label: "Ping",
-                    data: Object.entries(r.data).map(v => { return { x: LocaleFormatter.format(v[0]), y: v[1] } } ),
+                    data: Object.entries(r.data).map(v => { return { x: LocaleFormatter.format(v[0]), y: v[1].ping } } ),
                     borderColor: "rgb(159, 159, 159)"
                 }];
                 historyChart.update();
@@ -88,18 +83,17 @@
             $.get("/api/status", {}, (d) => {
 
                 // Load status information
-                $("#status").text(d.status[0]);
-                $("#status").css("color", `var(--ii-${d.status[1]})`);
+                $("nav").css("background-image", `url("/s/img/${d.status}.png")`);
 
                 // Render our service data
-                for (let service of d.services) {
+                for (let service of Object.values(d.data)) {
                     let elems = $(`div[data-rsl-id='${service.id}']`).children();
-                    let color = { up: "green", slow: "yellow", down: "red" }[service.guess[0]];
+                    let color = { up: "green", slow: "yellow", down: "red" }[service.guess.name];
 
                     // Update service data
                     $(elems[0]).css("color", `var(--ii-${color})`);  // Service header
                     $(elems[1]).text(`${Math.round(service.ping)}ms`);  // Ping time
-                    $(elems[2]).text(service.guess[1]);  // Guess element (.card-text)
+                    $(elems[2]).text(service.guess.reason);  // Guess element (.card-text)
                 }
             })
         }, 60000);  // 1m since our internal database doesn't update faster than that

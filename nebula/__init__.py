@@ -17,5 +17,10 @@ app = Flask(
 app.version = "1.1.0"
 app.reader = SyncReader()
 
+# Jinja env
+@app.context_processor
+def insert_globals() -> dict:
+    return {"app": app, "status": app.reader.get_overall_status()}
+
 # Routes
 from .routes import (api, public)
