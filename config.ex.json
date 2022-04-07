@@ -1,5 +1,5 @@
 {
     "nebula.upstream": "data.robloxstatus.live",
-    "nebula.protocol": "http",
+    "nebula.protocol": "https",
     "nebula.cache_dir": "./cache"
 }
