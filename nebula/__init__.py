@@ -14,13 +14,13 @@ app = Flask(
     "Nebula",
     template_folder = rpath("src/templates")
 )
-app.version = "1.1.0"
+app.version = "1.1.1"
 app.reader = SyncReader()
 
 # Jinja env
 @app.context_processor
 def insert_globals() -> dict:
-    return {"app": app, "status": app.reader.get_overall_status()}
+    return {"app": app, "status": app.reader.get_overall_status() or "slow", "read": lambda f: open(rpath(f"src/templates/{f}"), "r").read()}
 
 # Routes
 from .routes import (api, public)

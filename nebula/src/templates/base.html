@@ -100,8 +100,8 @@
             }
 
             /* Media scaling */
-            @media (max-width: 1435px) {
-                footer { display: none; }
+            @media (max-width: 1600px) {
+                .col-sm-2 { width: 25%; }
             }
 
             /* Bootstrap custom modal dark theme */
@@ -111,6 +111,7 @@
             .modal-content {
                 background-color: var(--ii-gray3);
             }
+            .modal-dialog { max-width: 650px; }
             .modal-notice {
                 font-size: 12px;
                 margin-top: 20px;
@@ -159,22 +160,24 @@
                 <h1 class = "navbar-brand"><a href = "/">
                     <span style = "color: black;">Roblox Status Live</span>
                 </a></h1>
-                <a href = "/api/docs">API docs</a> ·
-                <a href = "https://github.com/RobloxStatusLive/nebula">Github</a> ·
-                <a href = "https://devforum.roblox.com/t/roblox-status-live-the-better-automatic-roblox-down-detector/1567879">Devforum</a>
+                <p style = "color: black;">
+                    <a href = "/api/docs">API docs</a> ·
+                    <a href = "https://github.com/RobloxStatusLive/nebula">Github</a> ·
+                    <a href = "https://devforum.roblox.com/t/roblox-status-live-the-better-automatic-roblox-down-detector/1567879">Devforum</a>
+                </p>
             </div>
         </nav>
 
         <!-- Content -->
         <div id = "content">
             {% block content %}{% endblock %}
+        
+            <!-- Footer -->
+            <footer>
+                <img src = "/s/favicon.png" style = "max-height: 20px;"> Nebula v{{ app.version }}<br>
+                Made with ❤️ by <a href = "https://iipython.cf">iiPython</a> + <a href = "https://devforum.roblox.com/u/crcoli737">Crcoli737</a>
+            </footer>
         </div>
-
-        <!-- Footer -->
-        <footer>
-            <img src = "/s/favicon.png" style = "max-height: 20px;"> Nebula v{{ app.version }}<br>
-            Made with ❤️ by <a href = "https://iipython.cf">iiPython</a> + <a href = "https://devforum.roblox.com/u/crcoli737">Crcoli737</a>
-        </footer>
 
         <!-- JS -->
         <script src = "https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -3,7 +3,7 @@
 # Modules
 from itertools import islice
 from nebula import app, rpath
-from flask import render_template, send_from_directory
+from flask import render_template, send_from_directory, request
 
 # Initialization
 def chunks(data: dict):
@@ -14,10 +14,26 @@ def chunks(data: dict):
 # Routes
 @app.route("/", methods = ["GET"])
 def route_index() -> None:
-    return render_template(
-        "index.html",
-        data = chunks(app.reader.get_current())
-    ), 200
+    if request.user_agent.platform in ["android", "iphone"]:
+        return route_layout_list()
+
+    return route_layout_grid()
+
+@app.route("/grid", methods = ["GET"])
+def route_layout_grid() -> None:
+    data = app.reader.get_current()
+    if data is None:
+        return render_template("errors/nodata.html"), 200
+
+    return render_template("layouts/grid.html", data = chunks(data)), 200
+
+@app.route("/list", methods = ["GET"])
+def route_layout_list() -> None:
+    data = app.reader.get_current()
+    if data is None:
+        return render_template("errors/nodata.html"), 200
+
+    return render_template("layouts/list.html", data = data), 200
 
 @app.route("/api/docs", methods = ["GET"])
 def route_api_docs() -> None:

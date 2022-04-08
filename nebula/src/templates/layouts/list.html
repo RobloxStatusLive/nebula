@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% set title = "Home" %}
+{% block content %}
+    <style>
+        th p {
+            width: fit-content;
+            margin: 0;
+            cursor: pointer;
+        }
+        footer {
+            position: static;
+        }
+    </style>
+    <table class = "table table-dark">
+        <thead>
+            <tr>
+                <th scope = "col">Name</th>
+                <th scope = "col">Ping</th>
+                <th scope = "col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for id, service in data.items() %}
+                <tr data-rsl-id = "{{ id }}">
+                    {% set color = {"up": "green", "slow": "yellow", "down": "red"}[service["guess"]["name"]] %}
+                    <th><p style = "color: var(--ii-{{ color }});" data-bs-toggle = "tooltip" data-bs-placement = "top" title = "{{ service['url'].removeprefix('https://').split('/')[0] }}">{{ service["name"] }}</p></th>
+                    <td>{{ service["ping"]|round(2)|int }}ms</td>
+                    <td>{{ service["guess"]["reason"] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+{% block jstags %}
+    <script>
+        let NebulaConfig = {
+            clickElement: "tr[data-rsl-id] th p",
+            elementOverwriteCallback: (elems) => {
+                $($(elems[0]).children()[0]).css("color", `var(--ii-${color})`);  // Service header
+                $(elems[1]).text(`${Math.round(service.ping)}ms`);  // Ping time
+                $(elems[2]).text(service.guess.reason);  // Guess element (.card-text)
+            }
+        };
+    </script>
+    <script>{{ read("js/autoreload.js") | safe }}</script>
+{% endblock %}

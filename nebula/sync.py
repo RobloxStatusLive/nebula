@@ -20,7 +20,8 @@ def make_fake_rich():
             self.add_column = lambda *a: None
 
         def add_row(self, date: str, local: str, upstream: str) -> None:
-            print(f"{self.strip(date)}\t{self.strip(local)} .. {self.strip(upstream)}")
+            now = datetime.now().strftime("%D %I:%M %p")
+            print(f"[{now}] {self.strip(date)}\t{self.strip(local)} .. {self.strip(upstream)}")
 
         def strip(self, value: str) -> str:
             for i in re.findall(re.compile(r"\[[^\[\]]*\]"), value):
@@ -109,9 +110,10 @@ class SyncManager(object):
         with open(fp, "w+") as fh:
             fh.write(data)
 
-    def request(self, endpoint: str) -> list | dict:
+    def request(self, endpoint: str, auto_json: bool = True) -> str | list | dict:
         try:
-            return requests.get(self.upstream + endpoint, timeout = 2).json()
+            data = requests.get(self.upstream + endpoint, timeout = 2)
+            return data.json() if auto_json else data.text
 
         except Exception:
             return {}
@@ -134,7 +136,7 @@ class SyncManager(object):
             local_checksum = self.checksum(date + ".json")
             tb.add_row(f"[cyan]{date}", f"[{'green' if local_checksum == checksum else 'red'}]{local_checksum}", f"[green]{checksum}")
             if local_checksum != checksum:
-                self.cache(date + ".json", json.dumps(self.request(date)))
+                self.cache(date + ".json", self.request(date, auto_json = False))
 
         self.rcon.clear()
         self.rcon.print(tb)
@@ -142,4 +144,4 @@ class SyncManager(object):
     def loop(self) -> None:
         while True:
             self.sync()
-            sleep(30)
+            sleep(5)

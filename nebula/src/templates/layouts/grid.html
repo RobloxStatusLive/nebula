@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% set title = "Home" %}
+{% block content %}
+    <style>
+        #mobile-notice { display: none; }
+        @media (max-width: 1035px) {
+            #services { display: none; }
+            #mobile-notice { display: block; }
+        }
+    </style>
+    <div id = "mobile-notice">
+        <p>
+            Hey there! Looks like your display is too small to fit the Nebula grid layout.<br>
+            <a href = "/list">Click here to view the list format instead.</a>
+        </p>
+    </div>
+    <div id = "services">
+        {% for row in data %}
+            <div class = "row service-row">
+                {% for id, service in row.items() %}
+                    <div class = "col-sm-2">
+                        <div class = "card service-card">
+                            <div class = "card-body" data-rsl-id = "{{ id }}">
+                                {% set color = {"up": "green", "slow": "yellow", "down": "red"}[service["guess"]["name"]] %}
+                                <h6 class = "card-title" style = "color: var(--ii-{{ color }});" data-bs-toggle = "tooltip" data-bs-placement = "top" title = "{{ service['url'].removeprefix('https://').split('/')[0] }}">{{ service["name"] }}</h6>
+                                <span style = "position: absolute; right: 1rem; top: 1rem;">{{ service["ping"]|round(2)|int }}ms</span>
+                                <p class = "card-text">{{ service["guess"]["reason"] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+{% block jstags %}
+    <script>let NebulaConfig = { clickElement: "div[data-rsl-id] h6" };</script>
+    <script>{{ read("js/autoreload.js") | safe }}</script>
+{% endblock %}
