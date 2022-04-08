@@ -8,6 +8,7 @@ import hashlib
 import requests
 from time import sleep
 from datetime import datetime
+from typing import Any, Union
 
 from .config import config
 
@@ -54,7 +55,7 @@ class SyncReader(object):
     def __init__(self) -> None:
         self.date_formats = ["%-m-%-d-%Y", "%m-%d-%Y", "%-m-%-d-%y", "%m-%d-%y"]
 
-    def format_date(self, date: datetime | str) -> str:
+    def format_date(self, date: Any) -> str:
         if isinstance(date, datetime):
             return date.strftime("%-m-%-d-%Y")
 
@@ -65,7 +66,7 @@ class SyncReader(object):
             except ValueError:
                 pass
 
-    def get_date(self, date: datetime | str) -> dict | None:
+    def get_date(self, date: Any) -> Union[dict, None]:
         path = os.path.join(cache_dir, f"{self.format_date(date)}.json")
         if not os.path.isfile(path):
             return None
@@ -73,7 +74,7 @@ class SyncReader(object):
         with open(path, "r") as fh:
             return json.loads(fh.read())
 
-    def get_date_latest(self, date: datetime | str) -> dict | None:
+    def get_date_latest(self, date: Any) -> Union[dict, None]:
         data = self.get_date(date)
         if data is None:
             return None
@@ -83,7 +84,7 @@ class SyncReader(object):
     def get_current(self) -> dict:
         return self.get_date_latest(datetime.now())
 
-    def get_overall_status(self, date: datetime | str = None) -> str | None:
+    def get_overall_status(self, date: Any = None) -> Union[str, None]:
         if date is None:
             date = datetime.now()
 
@@ -110,7 +111,7 @@ class SyncManager(object):
         with open(fp, "w+") as fh:
             fh.write(data)
 
-    def request(self, endpoint: str, auto_json: bool = True) -> str | list | dict:
+    def request(self, endpoint: str, auto_json: bool = True) -> Union[str, list, dict]:
         try:
             data = requests.get(self.upstream + endpoint, timeout = 2)
             return data.json() if auto_json else data.text
@@ -118,7 +119,7 @@ class SyncManager(object):
         except Exception:
             return {}
 
-    def checksum(self, fn: str) -> str | None:
+    def checksum(self, fn: str) -> Union[str, None]:
         fp = os.path.join(cache_dir, fn)
         if not os.path.isfile(fp):
             return None
