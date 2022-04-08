@@ -82,11 +82,11 @@ class SyncReader(object):
         return data[sorted(data, key = lambda d: d, reverse = True)[0]]
 
     def get_current(self) -> dict:
-        return self.get_date_latest(datetime.now())
+        return self.get_date_latest(datetime.utcnow())
 
     def get_overall_status(self, date: Any = None) -> Union[str, None]:
         if date is None:
-            date = datetime.now()
+            date = datetime.utcnow()
 
         data = self.get_date_latest(date)
         if data is None:
