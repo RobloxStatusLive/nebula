@@ -6,7 +6,10 @@ import json
 from typing import Any
 
 # Initialization
-global_defaults = {}
+global_defaults = {
+    "nebula.enable_memcache": True,
+    "nebula.protocol": "https"
+}
 
 # Configuration class
 class Configuration(object):

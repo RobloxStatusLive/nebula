@@ -4,6 +4,7 @@
 import os
 import sys
 import json
+import time
 import hashlib
 import requests
 from time import sleep
@@ -54,6 +55,7 @@ cache_dir = config.get("nebula.cache_dir", os.path.join(os.path.dirname(__file__
 class SyncReader(object):
     def __init__(self) -> None:
         self.date_formats = ["%-m-%-d-%Y", "%m-%d-%Y", "%-m-%-d-%y", "%m-%d-%y"]
+        self.date_cache = {}
 
     def format_date(self, date: Any) -> str:
         if isinstance(date, datetime):
@@ -67,12 +69,31 @@ class SyncReader(object):
                 pass
 
     def get_date(self, date: Any) -> Union[dict, None]:
-        path = os.path.join(cache_dir, f"{self.format_date(date)}.json")
-        if not os.path.isfile(path):
-            return None
+        def load_data() -> dict:
+            path = os.path.join(cache_dir, f"{self.format_date(date)}.json")
+            if not os.path.isfile(path):
+                return None
 
-        with open(path, "r") as fh:
-            return json.loads(fh.read())
+            with open(path, "r") as fh:
+                return json.loads(fh.read())
+
+        # Handle memory caching
+        if config.get("nebula.enable_memcache"):
+            if date not in self.date_cache:
+                self.date_cache[date] = (time.time(), load_data())
+
+            else:
+                tm, cache_time = time.time(), self.date_cache[date][0]
+                if (tm - cache_time) > 60:
+                    self.date_cache[date] = (tm, load_data())  # Regenerate cache
+
+            data = self.date_cache[date][1]
+
+        else:
+            data = load_data()
+
+        # Send off data
+        return data
 
     def get_date_latest(self, date: Any) -> Union[dict, None]:
         data = self.get_date(date)
@@ -101,7 +122,7 @@ class SyncReader(object):
 class SyncManager(object):
     def __init__(self) -> None:
         self.rcon = Console()
-        self.upstream = f"{config.get('nebula.protocol', 'https')}://{config.get('nebula.upstream')}/sync/"
+        self.upstream = f"{config.get('nebula.protocol')}://{config.get('nebula.upstream')}/sync/"
 
     def cache(self, fn: str, data: str) -> None:
         fp = os.path.join(cache_dir, fn)
