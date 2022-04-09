@@ -166,4 +166,4 @@ class SyncManager(object):
     def loop(self) -> None:
         while True:
             self.sync()
-            sleep(5)
+            sleep(30)
