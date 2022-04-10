@@ -69,8 +69,9 @@ class SyncReader(object):
                 pass
 
     def get_date(self, date: Any) -> Union[dict, None]:
-        def load_data() -> dict:
-            path = os.path.join(cache_dir, f"{self.format_date(date)}.json")
+        date = self.format_date(date)
+        def load_data() -> dict:  # noqa
+            path = os.path.join(cache_dir, f"{date}.json")
             if not os.path.isfile(path):
                 return None
 
