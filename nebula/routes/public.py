@@ -14,7 +14,7 @@ def chunks(data: dict):
 # Routes
 @app.route("/", methods = ["GET"])
 def route_index() -> None:
-    if request.user_agent.platform in ["android", "iphone"]:
+    if request.user_agent.platform in ["android", "iphone", "fennec", "iemobile", "mobile"]:
         return route_layout_list()
 
     return route_layout_grid()

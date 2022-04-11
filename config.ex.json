@@ -2,5 +2,6 @@
     "nebula.upstream": "data.robloxstatus.live",
     "nebula.protocol": "https",
     "nebula.cache_dir": "./cache",
+    "nebula.zlibLevel": 6,
     "nebula.enable_memcache": true
 }

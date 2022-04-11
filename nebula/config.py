@@ -8,7 +8,8 @@ from typing import Any
 # Initialization
 global_defaults = {
     "nebula.enable_memcache": True,
-    "nebula.protocol": "https"
+    "nebula.protocol": "https",
+    "nebula.zlibLevel": 6
 }
 
 # Configuration class

@@ -5,6 +5,7 @@ import os
 import sys
 import json
 import time
+import zlib
 import hashlib
 import requests
 from time import sleep
@@ -80,15 +81,16 @@ class SyncReader(object):
 
         # Handle memory caching
         if config.get("nebula.enable_memcache"):
+            get_zlib_data = lambda: zlib.compress(json.dumps(load_data()).encode(), config.get("nebula.zlibLevel"))  # noqa
             if date not in self.date_cache:
-                self.date_cache[date] = (time.time(), load_data())
+                self.date_cache[date] = (time.time(), get_zlib_data())
 
             else:
                 tm, cache_time = time.time(), self.date_cache[date][0]
                 if (tm - cache_time) > 60:
-                    self.date_cache[date] = (tm, load_data())  # Regenerate cache
+                    self.date_cache[date] = (tm, get_zlib_data())  # Regenerate cache
 
-            data = self.date_cache[date][1]
+            data = json.loads(zlib.decompress(self.date_cache[date][1]).decode())
 
         else:
             data = load_data()
