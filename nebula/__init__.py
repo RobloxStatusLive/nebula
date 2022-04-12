@@ -3,6 +3,7 @@
 # Modules
 import os
 from flask import Flask
+from flask_compress import Compress
 
 from .sync import SyncReader
 
@@ -16,6 +17,8 @@ app = Flask(
 )
 app.version = "1.1.4"
 app.reader = SyncReader()
+
+Compress(app)
 
 # Jinja env
 @app.context_processor
