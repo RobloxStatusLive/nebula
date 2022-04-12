@@ -5,7 +5,6 @@ import os
 import sys
 import json
 import time
-import zlib
 import hashlib
 import requests
 from time import sleep
@@ -58,6 +57,7 @@ class SyncReader(object):
     def __init__(self) -> None:
         self.date_formats = ["%-m-%-d-%Y", "%m-%d-%Y", "%-m-%-d-%y", "%m-%d-%y"]
         self.date_cache = {}
+        self.last = None
 
     def format_date(self, date: Any) -> str:
         if isinstance(date, datetime):
@@ -82,16 +82,15 @@ class SyncReader(object):
 
         # Handle memory caching
         if config.get("nebula.enable_memcache"):
-            get_zlib_data = lambda: zlib.compress(json.dumps(load_data()).encode(), config.get("nebula.zlibLevel"))  # noqa
             if date not in self.date_cache:
-                self.date_cache[date] = (time.time(), get_zlib_data())
+                self.date_cache[date] = (time.time(), load_data())
 
             else:
                 tm, cache_time = time.time(), self.date_cache[date][0]
                 if (tm - cache_time) > 60:
-                    self.date_cache[date] = (tm, get_zlib_data())  # Regenerate cache
+                    self.date_cache[date] = (tm, load_data())  # Regenerate cache
 
-            data = json.loads(zlib.decompress(self.date_cache[date][1]).decode())
+            data = self.date_cache[date][1]
 
         else:
             data = load_data()
@@ -104,16 +103,22 @@ class SyncReader(object):
         if data is None:
             return None
 
-        return data[sorted(data, key = lambda d: d, reverse = True)[0]]
+        self.last = data[sorted(data, key = lambda d: d, reverse = True)[0]]
+        return self.last
 
     def get_current(self) -> dict:
         return self.get_date_latest(datetime.utcnow())
 
     def get_overall_status(self, date: Any = None) -> Union[str, None]:
         if date is None:
-            date = datetime.utcnow()
+            if self.last:
+                data = self.last
 
-        data = self.get_date_latest(date)
+            else:
+                data = self.get_date_latest(datetime.utcnow())
+        else:
+            data = self.get_date_latest(date)
+
         if data is None:
             return None
 

@@ -15,7 +15,7 @@ app = Flask(
     "Nebula",
     template_folder = rpath("src/templates")
 )
-app.version = "1.1.4"
+app.version = "1.1.5"
 app.reader = SyncReader()
 
 Compress(app)
