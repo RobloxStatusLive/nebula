@@ -23,7 +23,7 @@ def route_api_day(date: str, service: str = None) -> None:
         return jsonify(data = data, status = app.reader.get_overall_status(date)), 200
 
     data = {time: services.get(service, {}) for time, services in data.items()}
-    if not all(data.values()):
+    if not any([k for k in data.values() if k]):
         return jsonify(code = 400, message = "Invalid or unknown service"), 400
 
     return jsonify(data = data), 200

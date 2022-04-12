@@ -14,7 +14,7 @@ app = Flask(
     "Nebula",
     template_folder = rpath("src/templates")
 )
-app.version = "1.1.3"
+app.version = "1.1.4"
 app.reader = SyncReader()
 
 # Jinja env

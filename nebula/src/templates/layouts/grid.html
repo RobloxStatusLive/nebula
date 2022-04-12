@@ -23,7 +23,7 @@
                         <div class = "card service-card">
                             <div class = "card-body" data-rsl-id = "{{ id }}">
                                 {% set color = {"up": "green", "slow": "yellow", "down": "red"}[service["guess"]["name"]] %}
-                                <h6 class = "card-title" style = "color: var(--ii-{{ color }});" data-bs-toggle = "tooltip" data-bs-placement = "top" title = "{{ service['url'].removeprefix('https://').split('/')[0] }}">{{ service["name"] }}</h6>
+                                <h6 class = "card-title" style = "color: var(--ii-{{ color }});" data-bs-toggle = "tooltip" data-bs-placement = "top" title = "{{ service['url'].removeprefix('https://').split('/')[0] }}"><i class = "bi bi-{{ icons.get(service['id'], 'question') }}"></i> {{ service["name"] }}</h6>
                                 <span style = "position: absolute; right: 1rem; top: 1rem;">{{ service["ping"]|round(2)|int }}ms</span>
                                 <p class = "card-text">{{ service["guess"]["reason"] }}</p>
                             </div>

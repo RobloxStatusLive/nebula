@@ -1,6 +1,7 @@
 # Copyright 2022 iiPython
 
 # Modules
+import json
 from itertools import islice
 from nebula import app, rpath
 from flask import render_template, send_from_directory, request
@@ -10,6 +11,9 @@ def chunks(data: dict):
     it = iter(data)
     for i in range(0, len(data), 4):
         yield {k: data[k] for k in islice(it, 4)}
+
+with open(rpath("icons.json"), "r") as icon_file:
+    icons = json.loads(icon_file.read())
 
 # Routes
 @app.route("/", methods = ["GET"])
@@ -25,7 +29,7 @@ def route_layout_grid() -> None:
     if data is None:
         return render_template("errors/nodata.html"), 200
 
-    return render_template("layouts/grid.html", data = chunks(data)), 200
+    return render_template("layouts/grid.html", data = chunks(data), icons = icons), 200
 
 @app.route("/list", methods = ["GET"])
 def route_layout_list() -> None:
