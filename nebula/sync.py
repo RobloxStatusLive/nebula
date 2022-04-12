@@ -23,8 +23,9 @@ def make_fake_rich():
             self.add_column = lambda *a: None
 
         def add_row(self, date: str, local: str, upstream: str) -> None:
-            now = datetime.now().strftime("%D %I:%M %p")
-            print(f"[{now}] {self.strip(date)}\t{self.strip(local)} .. {self.strip(upstream)}")
+            if local != upstream:  # Stop spamming of log file with useless data
+                now = datetime.now().strftime("%D %I:%M %p")
+                print(f"[{now}] {self.strip(date)}\t{self.strip(local)} .. {self.strip(upstream)}")
 
         def strip(self, value: str) -> str:
             for i in re.findall(re.compile(r"\[[^\[\]]*\]"), value):
@@ -157,11 +158,18 @@ class SyncManager(object):
     def sync(self) -> None:
         tb = Table(title = "Sync Status")
         [tb.add_column(c) for c in ["Date", "Local", "Upstream"]]
-        for date, checksum in self.request("status").items():
+
+        data = self.request("status")
+        for date, checksum in data.items():
             local_checksum = self.checksum(date + ".json")
             tb.add_row(f"[cyan]{date}", f"[{'green' if local_checksum == checksum else 'red'}]{local_checksum}", f"[green]{checksum}")
             if local_checksum != checksum:
                 self.cache(date + ".json", self.request(date, auto_json = False))
+
+        dates = data.keys()
+        for date in os.listdir(cache_dir):
+            if date.removesuffix(".json") not in dates:
+                os.remove(os.path.join(cache_dir, date))
 
         self.rcon.clear()
         self.rcon.print(tb)
