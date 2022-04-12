@@ -29,7 +29,7 @@ function hsRenderDate(date) {
         });
         historyChart.data.datasets = [{
             label: "Ping",
-            data: Object.entries(r.data).map(v => { return { x: LocaleFormatter.format(v[0]), y: v[1].ping } } ),
+            data: Object.entries(r.data).filter(entry => entry[0] % 5 === 0).map(v => { return { x: LocaleFormatter.format(v[0]), y: v[1].ping } } ),
             borderColor: "rgb(159, 159, 159)"
         }];
         historyChart.update();
