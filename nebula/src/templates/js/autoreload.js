@@ -65,7 +65,7 @@ setInterval(() => {
 
         // Render our service data
         for (let service of Object.values(d.data)) {
-            let elems = $(NebulaConfig.clickElement.replace("data-rsl-id", `data-rsl-id='${service.id}'`)).children();
+            let elems = $(NebulaConfig.clickElement.replace("data-rsl-id", `data-rsl-id='${service.id}'`)).parent().children();
             let color = { up: "green", slow: "yellow", down: "red" }[service.guess.name];
 
             // Update service data
