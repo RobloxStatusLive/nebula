@@ -4,7 +4,7 @@
 import json
 from itertools import islice
 from nebula import app, rpath
-from flask import render_template, send_from_directory, request
+from flask import render_template, request
 
 # Initialization
 def chunks(data: dict):
@@ -42,7 +42,3 @@ def route_layout_list() -> None:
 @app.route("/api/docs", methods = ["GET"])
 def route_api_docs() -> None:
     return render_template("api.html"), 200
-
-@app.route("/s/<path:path>", methods = ["GET"])
-def route_static_file(path: str) -> None:
-    return send_from_directory(rpath("src/static"), path)

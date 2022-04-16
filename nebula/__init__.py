@@ -26,4 +26,4 @@ def insert_globals() -> dict:
     return {"app": app, "status": app.reader.get_overall_status() or "slow", "read": lambda f: open(rpath(f"src/templates/{f}"), "r").read()}
 
 # Routes
-from .routes import (api, public)
+from .routes import (api, public, extra)
