@@ -22,9 +22,9 @@
         </thead>
         <tbody>
             {% for id, service in data.items() %}
-                <tr data-rsl-id = "{{ id }}">
+                <tr>
                     {% set color = {"up": "green", "slow": "yellow", "down": "red"}[service["guess"]["name"]] %}
-                    <th><p style = "color: var(--ii-{{ color }});" data-bs-toggle = "tooltip" data-bs-placement = "top" title = "{{ service['url'].removeprefix('https://').split('/')[0] }}">{{ service["name"] }}</p></th>
+                    <th data-rsl-id = "{{ id }}"><p style = "color: var(--ii-{{ color }});" data-bs-toggle = "tooltip" data-bs-placement = "top" title = "{{ service['url'].removeprefix('https://').split('/')[0] }}">{{ service["name"] }}</p></th>
                     <td>{{ service["ping"]|round(2)|int }}ms</td>
                     <td>{{ service["guess"]["reason"] }}</td>
                 </tr>
@@ -35,7 +35,7 @@
 {% block jstags %}
     <script>
         let NebulaConfig = {
-            clickElement: "tr[data-rsl-id] th p",
+            clickElement: "tr th[data-rsl-id] p",
             elementOverwriteCallback: (elems) => {
                 $($(elems[0]).children()[0]).css("color", `var(--ii-${color})`);  // Service header
                 $(elems[1]).text(`${Math.round(service.ping)}ms`);  // Ping time

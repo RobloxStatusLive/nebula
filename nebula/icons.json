@@ -1,6 +1,7 @@
 {
     "accountinformation": "person-badge",
     "accountsettings": "gear",
+    "ads": "badge-ad",
     "assetdelivery": "box-seam",
     "auth": "shield-slash",
     "avatar": "person-circle",
@@ -19,6 +20,7 @@
     "inventory": "wallet",
     "locale": "translate",
     "notifications": "app-indicator",
+    "metrics": "activity",
     "premiumfeatures": "stars",
     "privatemessages": "chat-left-dots",
     "publish": "cloud-arrow-up",
