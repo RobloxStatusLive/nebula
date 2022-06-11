@@ -2,9 +2,11 @@
 
 # Modules
 import os
+import io
 import sys
 import json
 import time
+import tarfile
 import hashlib
 import requests
 from time import sleep
@@ -133,18 +135,19 @@ class SyncManager(object):
         self.rcon = Console()
         self.upstream = f"{config.get('nebula.protocol')}://{config.get('nebula.upstream')}/sync/"
 
-    def cache(self, fn: str, data: str) -> None:
+    def cache(self, fn: str, data: bytes) -> None:
         fp = os.path.join(cache_dir, fn)
         if not os.path.isdir(cache_dir):
             os.makedirs(cache_dir)
 
         with open(fp, "w+") as fh:
-            fh.write(data)
+            fh.write(data.decode())
 
-    def request(self, endpoint: str, auto_json: bool = True) -> Union[str, list, dict]:
+    def request(self, endpoint: str, auto_json: bool = True, ret_bytes: bool = False) -> Union[str, list, dict]:
         try:
+            print(self.upstream + endpoint)
             data = requests.get(self.upstream + endpoint, timeout = 2)
-            return data.json() if auto_json else data.text
+            return (data.json() if auto_json else data.text) if not ret_bytes else data.content
 
         except Exception:
             return {}
@@ -154,10 +157,14 @@ class SyncManager(object):
         if not os.path.isfile(fp):
             return None
 
-        checksum = hashlib.md5()
-        with open(fp, "rb") as fh:
-            [checksum.update(c) for c in iter(lambda: fh.read(4096), b"")]
+        # currently doesn't work, idk why but it doesn't
+        # it still works though, just makes a lot more syncing requests
+        container = io.BytesIO()
+        with tarfile.open(mode = "w:gz", fileobj = container) as t:
+            t.add(fp, fn)
 
+        checksum = hashlib.md5()
+        [checksum.update(c) for c in iter(lambda: container.read(4096), b"")]
         return checksum.hexdigest()
 
     def sync(self) -> None:
@@ -169,7 +176,8 @@ class SyncManager(object):
             local_checksum = self.checksum(date + ".json")
             tb.add_row(f"[cyan]{date}", f"[{'green' if local_checksum == checksum else 'red'}]{local_checksum}", f"[green]{checksum}")
             if local_checksum != checksum:
-                self.cache(date + ".json", self.request(date, auto_json = False))
+                with tarfile.open(mode = "r:gz", fileobj = io.BytesIO(self.request(date, ret_bytes = True))) as fh:
+                    self.cache(date + ".json", fh.extractfile(date + ".json").read())
 
         dates = data.keys()
         for date in os.listdir(cache_dir):
@@ -182,4 +190,4 @@ class SyncManager(object):
     def loop(self) -> None:
         while True:
             self.sync()
-            sleep(30)
+            sleep(5)
