@@ -51,7 +51,8 @@ $(NebulaConfig.clickElement).click((e) => {
         <p class = "modal-notice"><a onclick = "hsRenderDate();">Today</a> · <a onclick = "hsRenderCustomDate();">Custom</a></p>
         `,
         buttons: { ok: { label: "Close", className: "btn btn-secondary", callback: () => {} } },
-        onEscape: true
+        onEscape: true,
+        backdrop: true
     })
     hsRenderDate();
 })

@@ -1,4 +1,5 @@
 rich
 flask
 requests
+gunicorn
 flask-compress
